@@ -120,12 +120,16 @@ public class WeaponController : MonoBehaviour
 
     const string k_AnimAttackParameter = "Attack";
 
+    public GameObject dryfire_parent;
+    AudioSource dryfire;
+
     //Telemetry
     bool reloading = false;
     int clicksBeforeFired = -1;
 
     void Awake()
     {
+        dryfire = dryfire_parent.GetComponent<AudioSource>();
         m_CurrentAmmo = maxAmmo;
         m_LastMuzzlePosition = weaponMuzzle.position;
 
@@ -262,26 +266,21 @@ public class WeaponController : MonoBehaviour
 
     public bool HandleShootInputs(bool inputDown, bool inputHeld, bool inputUp)
     {
-        //Telemetry
-        if (reloading && inputDown)
-        {
-            clicksBeforeFired++;
-        }
-
+        bool new_click = inputDown;
         m_wantsToShoot = inputDown || inputHeld;
         switch (shootType)
         {
             case WeaponShootType.Manual:
                 if (inputDown)
                 {
-                    return TryShoot();
+                    return TryShoot(new_click);
                 }
                 return false;
 
             case WeaponShootType.Automatic:
                 if (inputHeld)
                 {
-                    return TryShoot();
+                    return TryShoot(new_click);
                 }
                 return false;
 
@@ -302,17 +301,23 @@ public class WeaponController : MonoBehaviour
         }
     }
 
-    bool TryShoot()
+    bool TryShoot(bool new_click)
     {
         if (m_CurrentAmmo >= 1f 
             && m_LastTimeShot + delayBetweenShots < Time.time)
         {
             
-            HandleShoot();
+            HandleShoot(new_click);
             m_CurrentAmmo -= 1f;
 
             return true;
         }
+        else if (new_click)
+        {
+            clicksBeforeFired++;
+            dryfire.Play();
+        }
+
 
         return false;
     }
@@ -339,7 +344,7 @@ public class WeaponController : MonoBehaviour
     {
         if (isCharging)
         {
-            HandleShoot();
+            HandleShoot(false);
 
             currentCharge = 0f;
             isCharging = false;
@@ -349,7 +354,7 @@ public class WeaponController : MonoBehaviour
         return false;
     }
 
-    void HandleShoot()
+    void HandleShoot(bool new_click)
     {
         //Telemetry
         if(gameObject.name == "Weapon_EyeLazers" || gameObject.name == "Weapon_MachineGun")
@@ -358,6 +363,11 @@ public class WeaponController : MonoBehaviour
         }
         else if (reloading)
         {
+            if (new_click)
+            {
+                clicksBeforeFired++;
+                dryfire.Play();
+            }
             reloading = false;
             TelemetryLogger.LogClicksBeforeCanShoot(clicksBeforeFired, gameObject.name, GameObject.Find("Player").transform.position);
             clicksBeforeFired = -1;
