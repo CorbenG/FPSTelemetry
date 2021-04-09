@@ -443,4 +443,19 @@ public class WeaponController : MonoBehaviour
 
         return spreadWorldDirection;
     }
+
+    public bool can_shoot()
+    {
+        bool result = true;
+        if ( (((reloading && m_CurrentAmmo < maxAmmo) || m_CurrentAmmo < 1.0f) && shootType == WeaponShootType.Automatic) || ((m_CurrentAmmo < 1.0f) && (shootType == WeaponShootType.Manual)) || (shootType == WeaponShootType.Charge && (m_CurrentAmmo< 1.0f && !isCharging)) )
+        {
+            result = false;
+        }
+        else
+        {
+            result = true;
+        }
+
+        return result;
+    }
 }

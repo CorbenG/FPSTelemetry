@@ -75,6 +75,7 @@ public class PlayerWeaponsManager : MonoBehaviour
     Vector3 m_WeaponBobLocalPosition;
     Vector3 m_WeaponRecoilLocalPosition;
     Vector3 m_AccumulatedRecoil;
+    Vector3 activation_offset = Vector3.zero;
     float m_TimeStartedWeaponSwitch;
     WeaponSwitchState m_WeaponSwitchState;
     int m_WeaponSwitchNewWeaponIndex;
@@ -116,7 +117,14 @@ public class PlayerWeaponsManager : MonoBehaviour
     {
         // shoot handling
         WeaponController activeWeapon = GetActiveWeapon();
-
+        if (activeWeapon.can_shoot())
+        {
+            activation_offset = Vector3.Lerp(activation_offset, Vector3.zero, Time.deltaTime * 10);
+        }
+        else
+        {
+            activation_offset = Vector3.Lerp(activation_offset, Vector3.left, Time.deltaTime * 10);
+        }
         if (activeWeapon && m_WeaponSwitchState == WeaponSwitchState.Up)
         {
             // handle aiming down sights
@@ -183,6 +191,7 @@ public class PlayerWeaponsManager : MonoBehaviour
 
         // Set final weapon socket position based on all the combined animation influences
         weaponParentSocket.localPosition = m_WeaponMainLocalPosition + m_WeaponBobLocalPosition + m_WeaponRecoilLocalPosition;
+        weaponParentSocket.localRotation = Quaternion.Euler(activation_offset * 50.0f);
     }
 
     // Sets the FOV of the main camera and the weapon camera simultaneously
