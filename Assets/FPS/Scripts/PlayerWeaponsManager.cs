@@ -141,6 +141,10 @@ public class PlayerWeaponsManager : MonoBehaviour
             {
                 m_AccumulatedRecoil += Vector3.back * activeWeapon.recoilForce;
                 m_AccumulatedRecoil = Vector3.ClampMagnitude(m_AccumulatedRecoil, maxRecoilDistance);
+                if (activeWeapon.can_shoot())
+                {
+                    activation_offset = Vector3.zero;
+                }
             }
         }
 
