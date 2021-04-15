@@ -152,6 +152,13 @@ public class WeaponController : MonoBehaviour
         UpdateCharge();
         UpdateContinuousShootSound();
 
+        //R button reloading
+        if (Input.GetKeyDown(KeyCode.R) && m_LastTimeShot + 0.1f < Time.time)
+        {
+            m_LastTimeShot -= ammoReloadDelay;
+        }
+
+
         if (Time.deltaTime > 0)
         {
             muzzleWorldVelocity = (weaponMuzzle.position - m_LastMuzzlePosition) / Time.deltaTime;
